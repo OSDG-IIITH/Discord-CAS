@@ -63,7 +63,7 @@ def get_users_from_discordid(user_id):
 
 def is_verified(user_id):
     """Checks if any user with the given ID exists in the DB or not."""
-    return len(get_users_from_discordid(user_id)) != 0
+    return True if get_users_from_discordid(user_id) else False
 
 
 def get_realname_from_discordid(user_id):
@@ -87,7 +87,15 @@ def get_config(server_id: str):
             return section_obj
 
     print(f"Server id {server_id} not found in server config")
-    sys.exit(1)
+    return None
+
+
+def get_first_channel_with_permission(guild):
+    for channel in guild.text_channels:
+        if channel.permissions_for(guild.me).send_messages:
+            return channel
+
+    return None
 
 
 async def create_roles_if_missing(guild, req_guild_roles):
@@ -144,6 +152,13 @@ async def post_verification(ctx, user):
     server_id = str(ctx.guild.id)
     server_config = get_config(server_id)
 
+    if server_config is None:
+        await ctx.send(
+                "This server is not authorized to work with CAS-bot. Read the instructions to invite the bot in the project README"
+                )
+        await ctx.guild.leave()
+        return
+
     await assign_role(ctx.guild, user, server_config)
     await delete_role(ctx.guild, user, server_config)
 
@@ -196,7 +211,12 @@ async def backend_info(ctx):
 
 def is_academic(ctx: commands.Context):
     """Checks if the server is an academic server."""
-    return get_config(str(ctx.guild.id)).get("is_academic", False)
+    server_config = get_config(str(ctx.guild.id))
+
+    if server_config is None:
+        return False
+    return server_config.get("is_academic", False)
+
 
 
 @bot.command(name="query")
@@ -257,6 +277,25 @@ async def roll_error(ctx, error):
     """
     if isinstance(error, commands.CheckFailure):
         await ctx.reply("This server is not for academic purposes.")
+
+
+@bot.event
+async def on_guild_join(guild):
+    server_id = str(guild.id)
+    server_config = get_config(server_id)
+
+    welcome_message = "CAS-bot has joined this server"
+    first_channel = get_first_channel_with_permission(guild)
+
+    if not server_config:
+        welcome_message = "This server is not authorized to work with CAS-bot. Read the instructions to invite the bot in the project README."
+        if first_channel:
+            await first_channel.send(welcome_message)
+        await guild.leave()
+        return
+    
+    if first_channel:
+        await first_channel.send(welcome_message)
 
 
 @bot.event

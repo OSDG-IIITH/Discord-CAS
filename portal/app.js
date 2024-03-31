@@ -167,29 +167,4 @@ app.get("/cas", async (req, res) => {
   }, config.BASE_URL + "/cas");
 });
 
-app.get("/bot", async (req, res) => {
-  if (!req.query.code || !req.query.guild_id) {
-    res.send("You are not discord :angry:", 400);
-    return;
-  }
-
-  const guild_id = req.query.guild_id;
-
-  if (!server_ids.includes(guild_id)) {
-    res.send("Read the instructions to invite the bot in the project README", 400);
-    return;
-  }
-
-  const code = req.query.code;
-  let redirect_uri = config.BASE_URL + "/bot";
-  const responseJson = await makeQuery(code, redirect_uri);
-
-  if (responseJson && responseJson.access_token) {
-    res.send("Added successfully!");     
-  } else {
-    logger.error(responseJson);
-    res.send("Unkown error occured");
-  }
-});
-
 module.exports = app;
