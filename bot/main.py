@@ -52,6 +52,13 @@ bot = commands.Bot(command_prefix=".")
 db: database.Database = None  # assigned in main function
 
 
+class CheckFailedException(commands.CommandError):
+    """Custom exception to help identify which check function failed."""
+    def __init__(self, check_name):
+        """Initialise with the name of the check."""
+        self.check_name = check_name
+
+
 def get_users_from_discordid(user_id):
     """
     Finds users from the database, given their ID and returns
@@ -75,7 +82,9 @@ def is_author_bot_admin(ctx: commands.Context):
     """Wrapper function for `is_bot_admin`; checks if the user who invoked the command
     is a bot admin or not."""
     userID = ctx.message.author.id
-    return is_bot_admin(str(userID))
+    if not is_bot_admin(str(userID)):
+        raise CheckFailedException("is_author_bot_admin")
+    return True
 
 
 def get_realname_from_discordid(user_id):
@@ -233,7 +242,7 @@ def is_academic(ctx: commands.Context):
     server_config = get_config(str(ctx.guild.id))
 
     if server_config is None:
-        return False
+        raise CheckFailedException("is_academic")
     return server_config.get("is_academic", False)
 
 
