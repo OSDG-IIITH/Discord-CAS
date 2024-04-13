@@ -71,6 +71,13 @@ def is_bot_admin(userID: str):
     return userID in BOT_ADMINS
 
 
+def is_author_bot_admin(ctx: commands.Context):
+    """Wrapper function for `is_bot_admin`; checks if the user who invoked the command
+    is a bot admin or not."""
+    userID = ctx.message.author.id
+    return is_bot_admin(str(userID))
+
+
 def get_realname_from_discordid(user_id):
     """Returns the real name of the first user who matches the given ID."""
     users = get_users_from_discordid(user_id)
