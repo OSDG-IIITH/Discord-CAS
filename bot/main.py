@@ -66,6 +66,11 @@ def is_verified(user_id):
     return True if get_users_from_discordid(user_id) else False
 
 
+def is_bot_admin(userID: str):
+    """Checks if the user with the given discord ID is a bot admin or not."""
+    return userID in BOT_ADMINS
+
+
 def get_realname_from_discordid(user_id):
     """Returns the real name of the first user who matches the given ID."""
     users = get_users_from_discordid(user_id)
