@@ -54,6 +54,7 @@ db: database.Database = None  # assigned in main function
 
 class CheckFailedException(commands.CommandError):
     """Custom exception to help identify which check function failed."""
+
     def __init__(self, check_name):
         """Initialise with the name of the check."""
         self.check_name = check_name
