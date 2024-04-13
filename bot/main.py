@@ -65,6 +65,7 @@ class CheckFailedException(commands.CommandError):
 
     def __init__(self, check_name):
         """Initialise with the name of the check."""
+        super().__init__()
         self.check_name = check_name
 
 
@@ -82,16 +83,16 @@ def is_verified(user_id):
     return True if get_users_from_discordid(user_id) else False
 
 
-def is_bot_admin(userID: str):
+def is_bot_admin(user_id: str):
     """Checks if the user with the given discord ID is a bot admin or not."""
-    return userID in BOT_ADMINS
+    return user_id in BOT_ADMINS
 
 
 def is_author_bot_admin(ctx: commands.Context):
     """Wrapper function for `is_bot_admin`; checks if the user who invoked the command
     is a bot admin or not."""
-    userID = ctx.message.author.id
-    if not is_bot_admin(str(userID)):
+    user_id = ctx.message.author.id
+    if not is_bot_admin(str(user_id)):
         raise CheckFailedException("is_author_bot_admin")
     return True
 
@@ -232,7 +233,6 @@ async def verify_user(ctx):
 async def backend_info(ctx):
     """For debugging server info; sends details of the server."""
 
-    authorID = str(ctx.message.author.id)
     uname = platform.uname()
     await ctx.send(
         f"Here are the server details:\n"
@@ -248,8 +248,8 @@ async def backend_info(ctx):
 async def backend_info_error(ctx, error):
     """If the author of the message is not a bot admin then reply accordingly."""
     if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_author_bot_admin":
-        authorID = str(ctx.message.author.id)
-        await ctx.reply(f"{authorID} is not a bot admin.")
+        author_id = str(ctx.message.author.id)
+        await ctx.reply(f"{author_id} is not a bot admin.")
     else:
         await ctx.reply("Some check failed.")
 
@@ -257,10 +257,10 @@ async def backend_info_error(ctx, error):
 def is_academic_or_bot_admin(ctx: commands.Context):
     """Checks if the server is an academic server or if the author is a bot admin."""
     server_config = get_config(str(ctx.guild.id))
-    userID = ctx.message.author.id
+    user_id = ctx.message.author.id
 
     if server_config is None:
-        if not is_bot_admin(str(userID)):
+        if not is_bot_admin(str(user_id)):
             raise CheckFailedException("is_academic_or_bot_admin")
     return server_config.get("is_academic", False)
 
@@ -293,8 +293,8 @@ async def query_error(ctx, error):
     admin, replies with error message.
     """
     if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_academic_or_bot_admin":
-        authorID = str(ctx.message.author.id)
-        await ctx.reply(f"This server is not for academic purposes and {authorID} is not a bot admin.")
+        author_id = str(ctx.message.author.id)
+        await ctx.reply(f"This server is not for academic purposes and {author_id} is not a bot admin.")
     else:
         await ctx.reply("Some check failed.")
 
@@ -329,8 +329,8 @@ async def roll_error(ctx, error):
     replies with error message.
     """
     if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_academic_or_bot_admin":
-        authorID = str(ctx.message.author.id)
-        await ctx.reply(f"This server is not for academic purposes and {authorID} is not a bot admin.")
+        author_id = str(ctx.message.author.id)
+        await ctx.reply(f"This server is not for academic purposes and {author_id} is not a bot admin.")
     else:
         await ctx.reply("Some check failed.")
 
