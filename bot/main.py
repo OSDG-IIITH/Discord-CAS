@@ -212,7 +212,7 @@ async def verify_user(ctx):
 @bot.command(name="backend_info")
 async def backend_info(ctx):
     """For debugging server info; sends details of the server."""
-    
+
     authorID = str(ctx.message.author.id)
     if is_bot_admin(authorID):
         uname = platform.uname()
