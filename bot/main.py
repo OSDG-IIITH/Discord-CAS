@@ -45,6 +45,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 MONGO_DATABASE = os.getenv("MONGO_DATABASE")
 MONGO_URI = os.getenv("MONGO_URI")
 BASE_URL = os.getenv("BASE_URL")
+BOT_ADMINS = os.getenv("BOT_ADMINS").split(",")
 SERVER_CONFIG = ConfigParser()
 
 bot = commands.Bot(command_prefix=".")
