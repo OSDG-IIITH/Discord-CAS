@@ -212,15 +212,20 @@ async def verify_user(ctx):
 @bot.command(name="backend_info")
 async def backend_info(ctx):
     """For debugging server info; sends details of the server."""
-    uname = platform.uname()
-    await ctx.send(
-        f"Here are the server details:\n"
-        f"system: {uname.system}\n"
-        f"node: {uname.node}\n"
-        f"release: {uname.release}\n"
-        f"version: {uname.version}\n"
-        f"machine: {uname.machine}"
-    )
+    
+    authorID = str(ctx.message.author.id)
+    if is_bot_admin(authorID):
+        uname = platform.uname()
+        await ctx.send(
+            f"Here are the server details:\n"
+            f"system: {uname.system}\n"
+            f"node: {uname.node}\n"
+            f"release: {uname.release}\n"
+            f"version: {uname.version}\n"
+            f"machine: {uname.machine}"
+        )
+    else:
+        await ctx.reply(f"{authorID} is not a bot admin.")
 
 
 def is_academic(ctx: commands.Context):
