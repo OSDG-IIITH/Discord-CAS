@@ -243,28 +243,31 @@ async def backend_info_error(ctx, error):
         authorID = str(ctx.message.author.id)
         await ctx.reply(f"{authorID} is not a bot admin.")
     else:
-        await ctx.reply("Some checks failed.")
+        await ctx.reply("Some check failed.")
 
 
-def is_academic(ctx: commands.Context):
-    """Checks if the server is an academic server."""
+def is_academic_or_bot_admin(ctx: commands.Context):
+    """Checks if the server is an academic server or if the author is a bot admin."""
     server_config = get_config(str(ctx.guild.id))
+    userID = ctx.message.author.id
 
     if server_config is None:
-        raise CheckFailedException("is_academic")
+        if not is_bot_admin(str(userID)):
+            raise CheckFailedException("is_academic_or_bot_admin")
     return server_config.get("is_academic", False)
 
 
 @bot.command(name="query")
-@commands.check(is_academic)
+@commands.check(is_academic_or_bot_admin)
 async def query(
     ctx: commands.Context,
     identifier: discord.User,
 ):
     """
-    First checks if the server is an academic one. If so, finds the user who invoked the
-    command (by Discord ID) in the DB. If present, replies with their name, email and
-    roll number. Otherwise replies telling the user they are not registed with CAS.
+    First checks if the server is an academic one or if the user who invoked the 
+    command is a bot admin. If so, finds that user (by Discord ID) in the DB. 
+    If present, replies with their name, email and roll number.
+    Otherwise replies telling the user they are not registed with CAS.
     """
     user = db.users.find_one({"discordId": str(identifier.id)})
     if user:
@@ -278,22 +281,27 @@ async def query(
 @query.error
 async def query_error(ctx, error):
     """
-    For the `query` command, if the server is not academic, replies with error message.
+    For the `query` command, if the server is not academic and the invoking user is not a bot 
+    admin, replies with error message.
     """
-    if isinstance(error, commands.CheckFailure):
-        await ctx.reply("This server is not for academic purposes.")
+    if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_academic_or_bot_admin":
+        authorID = str(ctx.message.author.id)
+        await ctx.reply(f"This server is not for academic purposes and {authorID} is not a bot admin.")
+    else:
+        await ctx.reply("Some check failed.")
 
 
 @bot.command(name="roll")
-@commands.check(is_academic)
+@commands.check(is_academic_or_bot_admin)
 async def roll(
     ctx: commands.Context,
     identifier: int,
 ):
     """
-     First checks if the server is an academic one. If so, finds the user who invoked the
-    command in the DB. If present, replies with their name, email and
-    roll number. Otherwise replies telling the user they are not registed with CAS.
+    First checks if the server is an academic one or if the user who invoked the 
+    command is a bot admin If so, finds that user in the DB. If present, replies 
+    with their name, email and roll number. Otherwise replies telling the user 
+    they are not registed with CAS.
 
     Same as the `query` command, except this searches by roll number instead of Discord ID.
     """
@@ -309,10 +317,14 @@ async def roll(
 @roll.error
 async def roll_error(ctx, error):
     """
-    For the `roll` command, if the server is not academic, replies with error message.
+    For the `roll` command, if the server is not academic and the ivoking user is not a bot admin,
+    replies with error message.
     """
-    if isinstance(error, commands.CheckFailure):
-        await ctx.reply("This server is not for academic purposes.")
+    if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_academic_or_bot_admin":
+        authorID = str(ctx.message.author.id)
+        await ctx.reply(f"This server is not for academic purposes and {authorID} is not a bot admin.")
+    else:
+        await ctx.reply("Some check failed.")
 
 
 @bot.event
