@@ -220,22 +220,30 @@ async def verify_user(ctx):
 
 
 @bot.command(name="backend_info")
+@commands.check(is_author_bot_admin)
 async def backend_info(ctx):
     """For debugging server info; sends details of the server."""
 
     authorID = str(ctx.message.author.id)
-    if is_bot_admin(authorID):
-        uname = platform.uname()
-        await ctx.send(
-            f"Here are the server details:\n"
-            f"system: {uname.system}\n"
-            f"node: {uname.node}\n"
-            f"release: {uname.release}\n"
-            f"version: {uname.version}\n"
-            f"machine: {uname.machine}"
-        )
-    else:
+    uname = platform.uname()
+    await ctx.send(
+        f"Here are the server details:\n"
+        f"system: {uname.system}\n"
+        f"node: {uname.node}\n"
+        f"release: {uname.release}\n"
+        f"version: {uname.version}\n"
+        f"machine: {uname.machine}"
+    )
+
+
+@backend_info.error
+async def backend_info_error(ctx, error):
+    """If the author of the message is not a bot admin then reply accordingly."""
+    if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_author_bot_admin":
+        authorID = str(ctx.message.author.id)
         await ctx.reply(f"{authorID} is not a bot admin.")
+    else:
+        await ctx.reply("Some checks failed.")
 
 
 def is_academic(ctx: commands.Context):
