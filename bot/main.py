@@ -4,8 +4,10 @@ etc. are defined, as well the bot commands and a main routine.
 
 This module defines the following functions.
 
-- `get_users_from_discordid()`: Find users from DB given user ID
-- `is_verified()`: If a user is present in DB or not
+- `get_users_from_discordid()`: Find users from DB given user ID.
+- `is_verified()`: If a user is present in DB or not.
+- `is_bot_admin()`: If a user is a bot admin or not.
+- `is_author_bot_admin()`: If the author of the message is a bot admin or not.
 - `get_realname_from_discordid()`: Get a user's real name from their Discord ID.
 - `send_link()`: Send link for reattempting authentication.
 - `get_config()`: Gives the config object for a given server.
@@ -15,14 +17,20 @@ This module defines the following functions.
 - `set_nickname()`: Sets nickname of the given user to real name if server specifies.
 - `post_verification()`: Handle role add/delete and nickname set post-verification of given user.
 - `verify_user()`: Implements `.verify`.
-- `backend_info()`: Logs server details for debug purposes
-- `is_academic()`: Checks if server is for academic use.
-- `query()`: Returns user details, uses Discord ID to find in DB.
-- `query_error()`: Replies eror message if server is not academic.
-- `roll()`: Returns user details, uses roll number to find in DB.
-- `roll_error()`: Replies eror message if server is not academic.
+- `backend_info()`: Logs server details for debug purposes (bot admin only).
+- `backend_info_error()`: Replies with error message is user is not a bot admin.
+- `is_academic_or_bot_admin()`: Checks if server is for academic use or if the 
+    author of the message is a bot admin or not.
+- `query()`: Returns user details, uses Discord ID to find in DB (bot admin-able).
+- `query_error()`: Replies eror message if server is not academic and the user is not a bot admin.
+- `roll()`: Returns user details, uses roll number to find in DB (bot admin-able).
+- `roll_error()`: Replies eror message if server is not academic and the user is not a bot admin.
 - `on_ready()`: Logs a message when the bot joins a server.
 - `main()`: Reads server config, loads DB and starts bot.
+
+The module defines the following class:
+
+- `CheckFailedException`: to be able to identify what exact check function failed.
 
 """
 
