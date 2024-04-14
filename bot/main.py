@@ -19,7 +19,7 @@ This module defines the following functions.
 - `verify_user()`: Implements `.verify`.
 - `backend_info()`: Logs server details for debug purposes (bot admin only).
 - `backend_info_error()`: Replies with error message is user is not a bot admin.
-- `is_academic_or_bot_admin()`: Checks if server is for academic use or if the 
+- `is_academic_or_bot_admin()`: Checks if server is for academic use or if the
     author of the message is a bot admin or not.
 - `query()`: Returns user details, uses Discord ID to find in DB (bot admin-able).
 - `query_error()`: Replies eror message if server is not academic and the user is not a bot admin.
@@ -273,8 +273,8 @@ async def query(
     identifier: discord.User,
 ):
     """
-    First checks if the server is an academic one or if the user who invoked the 
-    command is a bot admin. If so, finds that user (by Discord ID) in the DB. 
+    First checks if the server is an academic one or if the user who invoked the
+    command is a bot admin. If so, finds that user (by Discord ID) in the DB.
     If present, replies with their name, email and roll number.
     Otherwise replies telling the user they are not registed with CAS.
     """
@@ -290,7 +290,7 @@ async def query(
 @query.error
 async def query_error(ctx, error):
     """
-    For the `query` command, if the server is not academic and the invoking user is not a bot 
+    For the `query` command, if the server is not academic and the invoking user is not a bot
     admin, replies with error message.
     """
     if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_academic_or_bot_admin":
@@ -307,9 +307,9 @@ async def roll(
     identifier: int,
 ):
     """
-    First checks if the server is an academic one or if the user who invoked the 
-    command is a bot admin If so, finds that user in the DB. If present, replies 
-    with their name, email and roll number. Otherwise replies telling the user 
+    First checks if the server is an academic one or if the user who invoked the
+    command is a bot admin If so, finds that user in the DB. If present, replies
+    with their name, email and roll number. Otherwise replies telling the user
     they are not registed with CAS.
 
     Same as the `query` command, except this searches by roll number instead of Discord ID.
