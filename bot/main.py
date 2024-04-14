@@ -247,7 +247,11 @@ async def backend_info(ctx):
 @backend_info.error
 async def backend_info_error(ctx, error):
     """If the author of the message is not a bot admin then reply accordingly."""
-    if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_author_bot_admin":
+    if (
+        isinstance(error, commands.CheckFailure)
+        and isinstance(error.original, CheckFailedException)
+        and error.original.check_name == "is_author_bot_admin"
+    ):
         author_id = ctx.message.author.id
         await ctx.reply(f"{author_id} is not a bot admin.")
     else:
@@ -293,9 +297,15 @@ async def query_error(ctx, error):
     For the `query` command, if the server is not academic and the invoking user is not a bot
     admin, replies with error message.
     """
-    if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_academic_or_bot_admin":
+    if (
+        isinstance(error, commands.CheckFailure)
+        and isinstance(error.original, CheckFailedException)
+        and error.original.check_name == "is_academic_or_bot_admin"
+    ):
         author_id = ctx.message.author.id
-        await ctx.reply(f"This server is not for academic purposes and {author_id} is not a bot admin.")
+        await ctx.reply(
+            f"This server is not for academic purposes and {author_id} is not a bot admin."
+        )
     else:
         await ctx.reply("Some check failed.")
 
@@ -329,9 +339,15 @@ async def roll_error(ctx, error):
     For the `roll` command, if the server is not academic and the ivoking user is not a bot admin,
     replies with error message.
     """
-    if isinstance(error, commands.CheckFailure) and isinstance(error.original, CheckFailedException) and error.original.check_name == "is_academic_or_bot_admin":
+    if (
+        isinstance(error, commands.CheckFailure)
+        and isinstance(error.original, CheckFailedException)
+        and error.original.check_name == "is_academic_or_bot_admin"
+    ):
         author_id = ctx.message.author.id
-        await ctx.reply(f"This server is not for academic purposes and {author_id} is not a bot admin.")
+        await ctx.reply(
+            f"This server is not for academic purposes and {author_id} is not a bot admin."
+        )
     else:
         await ctx.reply("Some check failed.")
 
