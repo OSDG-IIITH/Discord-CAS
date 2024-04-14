@@ -260,9 +260,10 @@ def is_academic_or_bot_admin(ctx: commands.Context):
     user_id = ctx.message.author.id
 
     if server_config is None:
-        if not is_bot_admin(str(user_id)):
-            raise CheckFailedException("is_academic_or_bot_admin")
-    return server_config.get("is_academic", False)
+        return False
+    if not server_config.get("is_academic", False) and not is_bot_admin(str(user_id)):
+        raise CheckFailedException("is_academic_or_bot_admin")
+    return True
 
 
 @bot.command(name="query")
