@@ -57,6 +57,8 @@ _PORT_AS_SUFFIX = f":{PORT}" if os.getenv("PORT") else ""
 SUBPATH = os.getenv("SUBPATH")
 BASE_URL = f"{PROTOCOL}://{HOST}{_PORT_AS_SUFFIX}{SUBPATH}"
 
+BOT_ADMINS = [int(id) for id in os.getenv("BOT_ADMINS").split(",") if id != ""]
+
 intent = discord.Intents.default()
 intent.message_content = True
 bot = commands.Bot(command_prefix=".", intents=intent)
