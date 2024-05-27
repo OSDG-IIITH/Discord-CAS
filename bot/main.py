@@ -237,16 +237,21 @@ async def verify_user(ctx: commands.Context):
 @bot.hybrid_command(name="backend_info")
 async def backend_info(ctx: commands.Context):
     """For debugging server info; sends details of the server."""
-    uname = platform.uname()
-    await ctx.reply(
-        f"Here are the server details:\n"
-        f"system: {uname.system}\n"
-        f"node: {uname.node}\n"
-        f"release: {uname.release}\n"
-        f"version: {uname.version}\n"
-        f"machine: {uname.machine}",
-        ephemeral=True,
-    )
+
+    author = ctx.message.author
+    if is_bot_admin(author.id):
+        uname = platform.uname()
+        await ctx.reply(
+            f"Here are the server details:\n"
+            f"system: {uname.system}\n"
+            f"node: {uname.node}\n"
+            f"release: {uname.release}\n"
+            f"version: {uname.version}\n"
+            f"machine: {uname.machine}",
+            ephemeral=True,
+        )
+    else:
+        await ctx.reply(f"{author.id} is not a bot admin.", ephemeral=True)
 
 
 def is_academic(ctx: commands.Context):
