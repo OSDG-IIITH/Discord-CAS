@@ -90,6 +90,9 @@ def is_verified(user_id: int):
     """Checks if any user with the given ID exists in the DB or not."""
     return True if get_users_from_discordid(user_id) else False
 
+def is_bot_admin(user_id: int):
+    """Checks if the user with the given discord ID is a bot admin or not."""
+    return user_id in BOT_ADMINS
 
 def get_realname_from_discordid(user_id: int):
     """Returns the real name of the first user who matches the given ID."""
