@@ -75,6 +75,15 @@ class DBEntry(TypedDict):
     view: bool
 
 
+class CheckFailedException(commands.CommandError):
+    """Custom exception to help identify which check function failed."""
+
+    def __init__(self, check_name: str):
+        """Initialise with the name of the check."""
+        super().__init__()
+        self.check_name = check_name
+
+
 def get_users_from_discordid(user_id: int):
     """
     Finds users from the database, given their ID and returns
@@ -99,8 +108,10 @@ def is_bot_admin(user_id: int):
 def is_author_bot_admin(ctx: commands.Context):
     """Wrapper check function for `is_bot_admin`; checks if the user who invoked the command
     is a bot admin or not."""
-    userID = ctx.message.author.id
-    return is_bot_admin(userID)
+    author = ctx.message.author
+    if not is_bot_admin(author.id):
+        raise CheckFailedException("is_author_bot_admin")
+    return True
 
 
 def get_realname_from_discordid(user_id: int):
@@ -235,23 +246,31 @@ async def verify_user(ctx: commands.Context):
 
 
 @bot.hybrid_command(name="backend_info")
+@commands.check(is_author_bot_admin)
 async def backend_info(ctx: commands.Context):
     """For debugging server info; sends details of the server."""
 
-    author = ctx.message.author
-    if is_bot_admin(author.id):
-        uname = platform.uname()
-        await ctx.reply(
-            f"Here are the server details:\n"
-            f"system: {uname.system}\n"
-            f"node: {uname.node}\n"
-            f"release: {uname.release}\n"
-            f"version: {uname.version}\n"
-            f"machine: {uname.machine}",
-            ephemeral=True,
-        )
+    uname = platform.uname()
+    await ctx.reply(
+        f"Here are the server details:\n"
+        f"system: {uname.system}\n"
+        f"node: {uname.node}\n"
+        f"release: {uname.release}\n"
+        f"version: {uname.version}\n"
+        f"machine: {uname.machine}",
+        ephemeral=True,
+    )
+
+
+@backend_info.error
+async def backend_info_error(ctx: commands.Context, error: Exception):
+    """If the author of the message is not a bot admin then reply accordingly."""
+    if isinstance(error, CheckFailedException) and \
+        error.check_name == "is_author_bot_admin":
+        author = ctx.message.author
+        await ctx.reply(f"{author.mention} is not a bot admin.", ephemeral=True)
     else:
-        await ctx.reply(f"{author.id} is not a bot admin.", ephemeral=True)
+        await ctx.reply("Some checks failed.", ephemeral=True)
 
 
 def is_academic(ctx: commands.Context):
@@ -260,9 +279,11 @@ def is_academic(ctx: commands.Context):
         return False
 
     try:
-        return server_configs[ctx.guild.id]["is_academic"]
+        if not server_configs[ctx.guild.id]["is_academic"]:
+            raise CheckFailedException("is_academic")
+        return True
     except KeyError:
-        return False
+        raise CheckFailedException("is_academic")
 
 
 @bot.hybrid_command(name="query")
@@ -301,8 +322,10 @@ async def query_error(ctx: commands.Context, error: Exception):
     """
     For the `query` command, if the server is not academic, replies with error message.
     """
-    if isinstance(error, commands.CheckFailure):
+    if isinstance(error, CheckFailedException) and error.check_name == "is_academic":
         await ctx.reply("This server is not for academic purposes.", ephemeral=True)
+    else:
+        await ctx.reply("Some checks failed.", ephemeral=True)
 
 
 @bot.hybrid_command(name="roll")
@@ -343,8 +366,10 @@ async def roll_error(ctx: commands.Context, error: Exception):
     """
     For the `roll` command, if the server is not academic, replies with error message.
     """
-    if isinstance(error, commands.CheckFailure):
+    if isinstance(error, CheckFailedException) and error.check_name == "is_academic":
         await ctx.reply("This server is not for academic purposes.", ephemeral=True)
+    else:
+        await ctx.reply("Some checks failed.", ephemeral=True)
 
 
 @bot.event
