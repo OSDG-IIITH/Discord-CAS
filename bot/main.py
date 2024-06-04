@@ -265,8 +265,10 @@ async def backend_info(ctx: commands.Context):
 @backend_info.error
 async def backend_info_error(ctx: commands.Context, error: Exception):
     """If the author of the message is not a bot admin then reply accordingly."""
-    if isinstance(error, CheckFailedException) and \
-        error.check_name == "is_author_bot_admin":
+    if (
+        isinstance(error, CheckFailedException)
+        and error.check_name == "is_author_bot_admin"
+    ):
         author = ctx.message.author
         await ctx.reply(f"{author.mention} is not a bot admin.", ephemeral=True)
     else:
@@ -326,11 +328,16 @@ async def query_error(ctx: commands.Context, error: Exception):
     For the `query` command, if the server is not academic and if the author is
     not a bot admin, replies with an error message.
     """
-    if isinstance(error, CheckFailedException) and error.check_name == "is_academic_or_bot_admin":
+    if (
+        isinstance(error, CheckFailedException)
+        and error.check_name == "is_academic_or_bot_admin"
+    ):
         author = ctx.message.author
-        await ctx.reply("This server is not for academic purposes "
-                        f"and {author.mention} is not a bot admin.",
-                        ephemeral=True)
+        await ctx.reply(
+            "This server is not for academic purposes "
+            f"and {author.mention} is not a bot admin.",
+            ephemeral=True,
+        )
     else:
         await ctx.reply("Some checks failed.", ephemeral=True)
 
@@ -377,10 +384,15 @@ async def roll_error(ctx: commands.Context, error: Exception):
     not a bot admin, replies with an error message.
     """
     author = ctx.message.author
-    if isinstance(error, CheckFailedException) and error.check_name == "is_academic_or_bot_admin":
-        await ctx.reply("This server is not for academic purposes "
-                        f"and {author.mention} is not a bot admin.",
-                        ephemeral=True)
+    if (
+        isinstance(error, CheckFailedException)
+        and error.check_name == "is_academic_or_bot_admin"
+    ):
+        await ctx.reply(
+            "This server is not for academic purposes "
+            f"and {author.mention} is not a bot admin.",
+            ephemeral=True,
+        )
     else:
         await ctx.reply("Some checks failed.", ephemeral=True)
 
