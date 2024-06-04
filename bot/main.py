@@ -6,6 +6,8 @@ This module defines the following functions.
 
 - `get_users_from_discordid()`: Find users from DB given user ID
 - `is_verified()`: If a user is present in DB or not
+- `is_bot_admin()`: If a user is a bot admin or not
+- `is_author_bot_admin()`: If the author of the current message is a bot admin or not
 - `get_realname_from_discordid()`: Get a user's real name from their Discord ID.
 - `send_link()`: Send link for reattempting authentication.
 - `create_roles_if_missing()`: Adds missing roles to a server.
