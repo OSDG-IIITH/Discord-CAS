@@ -273,29 +273,32 @@ async def backend_info_error(ctx: commands.Context, error: Exception):
         await ctx.reply("Some checks failed.", ephemeral=True)
 
 
-def is_academic(ctx: commands.Context):
-    """Checks if the server is an academic server."""
+def is_academic_or_bot_admin(ctx: commands.Context):
+    """Checks if the server is an academic server or if the author is a bot admin."""
     if ctx.guild is None:
         return False
 
     try:
-        if not server_configs[ctx.guild.id]["is_academic"]:
-            raise CheckFailedException("is_academic")
+        author = ctx.message.author
+        is_admin = is_bot_admin(author.id)
+        if not server_configs[ctx.guild.id]["is_academic"] and not is_admin:
+            raise CheckFailedException("is_academic_or_bot_admin")
         return True
     except KeyError:
-        raise CheckFailedException("is_academic")
+        raise CheckFailedException("server_config")
 
 
 @bot.hybrid_command(name="query")
-@commands.check(is_academic)
+@commands.check(is_academic_or_bot_admin)
 async def query(
     ctx: commands.Context,
     identifier: discord.User,
 ):
     """
-    First checks if the server is an academic one. If so, finds the user who invoked the
-    command (by Discord ID) in the DB. If present, replies with their name, email and
-    roll number. Otherwise replies telling the user they are not registed with CAS.
+    First checks if the server is an academic one or if the author is a bot admin.
+    If so, finds the user mentioned (by Discord ID) in the command in the DB.
+    If present, replies with their name, email and roll number. Otherwise
+    replies telling the author that the mentioned user is not registed with CAS.
     """
     if db is None:
         await ctx.reply(
@@ -320,26 +323,32 @@ async def query(
 @query.error
 async def query_error(ctx: commands.Context, error: Exception):
     """
-    For the `query` command, if the server is not academic, replies with error message.
+    For the `query` command, if the server is not academic and if the author is
+    not a bot admin, replies with an error message.
     """
-    if isinstance(error, CheckFailedException) and error.check_name == "is_academic":
-        await ctx.reply("This server is not for academic purposes.", ephemeral=True)
+    if isinstance(error, CheckFailedException) and error.check_name == "is_academic_or_bot_admin":
+        author = ctx.message.author
+        await ctx.reply("This server is not for academic purposes "
+                        f"and {author.mention} is not a bot admin.",
+                        ephemeral=True)
     else:
         await ctx.reply("Some checks failed.", ephemeral=True)
 
 
 @bot.hybrid_command(name="roll")
-@commands.check(is_academic)
+@commands.check(is_academic_or_bot_admin)
 async def roll(
     ctx: commands.Context,
     identifier: int,
 ):
     """
-     First checks if the server is an academic one. If so, finds the user who invoked the
-    command in the DB. If present, replies with their name, email and
-    roll number. Otherwise replies telling the user they are not registed with CAS.
+    First checks if the server is an academic one or if the author is a bot admin.
+    If so, finds the user mentioned in the command in the DB. If present, replies
+    with their name, email and roll number. Otherwise replies telling the author
+    that the mentioned user is not registed with CAS.
 
-    Same as the `query` command, except this searches by roll number instead of Discord ID.
+    Same as the `query` command, except the user is mentioned by roll number
+    instead of Discord ID.
     """
     if db is None:
         await ctx.reply(
@@ -364,10 +373,14 @@ async def roll(
 @roll.error
 async def roll_error(ctx: commands.Context, error: Exception):
     """
-    For the `roll` command, if the server is not academic, replies with error message.
+    For the `roll` command, if the server is not academic and if the author is
+    not a bot admin, replies with an error message.
     """
-    if isinstance(error, CheckFailedException) and error.check_name == "is_academic":
-        await ctx.reply("This server is not for academic purposes.", ephemeral=True)
+    author = ctx.message.author
+    if isinstance(error, CheckFailedException) and error.check_name == "is_academic_or_bot_admin":
+        await ctx.reply("This server is not for academic purposes "
+                        f"and {author.mention} is not a bot admin.",
+                        ephemeral=True)
     else:
         await ctx.reply("Some checks failed.", ephemeral=True)
 
