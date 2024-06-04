@@ -15,11 +15,11 @@ This module defines the following functions.
 - `post_verification()`: Handle role add/delete and nickname set post-verification of given user.
 - `verify_user()`: Implements `.verify`.
 - `backend_info()`: Logs server details for debug purposes
-- `is_academic()`: Checks if server is for academic use.
+- `is_academic_or_bot_admin()`: Checks if server is for academic use or if the author is a bot admin.
 - `query()`: Returns user details, uses Discord ID to find in DB.
-- `query_error()`: Replies eror message if server is not academic.
+- `query_error()`: Replies eror message if server is not academic or author is not a bot admin.
 - `roll()`: Returns user details, uses roll number to find in DB.
-- `roll_error()`: Replies eror message if server is not academic.
+- `roll_error()`: Replies eror message if server is not academic or author is not a bot admin.
 - `on_ready()`: Logs a message when the bot joins a server.
 - `main()`: Reads server config, loads DB and starts bot.
 
@@ -284,8 +284,8 @@ def is_academic_or_bot_admin(ctx: commands.Context):
         if not server_configs[ctx.guild.id]["is_academic"] and not is_admin:
             raise CheckFailedException("is_academic_or_bot_admin")
         return True
-    except KeyError:
-        raise CheckFailedException("server_config")
+    except KeyError as err:
+        raise CheckFailedException("server_config") from err
 
 
 @bot.hybrid_command(name="query")
