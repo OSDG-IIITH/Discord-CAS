@@ -229,15 +229,21 @@ async def post_verification(
         await ctx.guild.leave()
         return
 
-    await assign_role(member, server_config)
-    await delete_role(member, server_config)
+    try:
+        await assign_role(member, server_config)
+        await delete_role(member, server_config)
+    except discord.DiscordException:
+        await ctx.reply(
+            "Failed to assign or delete roles. "
+            "The server admin(s) should set up the right permissions for the bot"
+        )
 
     try:
         await set_nickname(member, server_config)
     except discord.DiscordException:
         await ctx.reply(
-            "Bot should have a role higher than you to change your nickname",
-            ephemeral=True,
+            "Failed to set nickname. "
+            "The server admin(s) should set up the right permissions for the bot."
         )
 
     await ctx.reply(f"{member.mention} has been CAS-verified on this server!")
