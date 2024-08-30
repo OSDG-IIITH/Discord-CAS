@@ -441,7 +441,7 @@ async def on_guild_join(guild: discord.Guild):
 async def on_ready():
     """This is executed when the bot connects to a server."""
     if not bot.user:
-        print(f"Failed to connect to discord! bot.user not defined")
+        print("Failed to connect to discord! bot.user not defined")
         return
 
     print(f"{bot.user.name} has connected to Discord!")
