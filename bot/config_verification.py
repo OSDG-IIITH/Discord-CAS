@@ -11,6 +11,7 @@ from typing import TypedDict
 
 
 class ConfigEntry(TypedDict):
+    configname: str
     grantroles: set[str]
     deleteroles: set[str]
     is_academic: bool
@@ -38,6 +39,7 @@ def read_and_validate_config(config_file_path: str):
         section_obj = server_config[section]
         try:
             cur = ret[section_obj.getint("serverid")] = {
+                "configname": section,
                 "grantroles": set(
                     i for i in section_obj.get("grantroles").split(",") if i
                 ),
@@ -51,7 +53,7 @@ def read_and_validate_config(config_file_path: str):
             print(f"ERROR: Invalid section '{section}'!")
             return None
 
-        if len(section_obj.keys()) != (len(cur) + 1):
+        if len(section_obj.keys()) != len(cur):
             print(f"ERROR: Got invalid amount of keys in {section}")
             return None
 

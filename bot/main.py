@@ -204,6 +204,18 @@ async def set_nickname(member: discord.Member, server_config: ConfigEntry):
         await member.edit(nick=realname)
 
 
+async def leave_guild(guild: discord.Guild, channel: discord.abc.Messageable | None):
+    """
+    Send a message to the given channel and leave the given guild.
+    """
+    if channel:
+        await channel.send(
+            "This server is not authorized to work with CAS-bot. "
+            "Read the instructions to invite the bot in the project README",
+        )
+    await guild.leave()
+
+
 async def post_verification(
     ctx: commands.Context, member: discord.Member | discord.User
 ):
@@ -222,11 +234,7 @@ async def post_verification(
 
     server_config = server_configs.get(ctx.guild.id)
     if server_config is None:
-        await ctx.reply(
-            "This server is not authorized to work with CAS-bot. Read the instructions to invite the bot in the project README",
-            ephemeral=True,
-        )
-        await ctx.guild.leave()
+        await leave_guild(ctx.guild, ctx.channel)
         return
 
     try:
@@ -420,24 +428,22 @@ async def roll_or_query_error(ctx: commands.Context, error: Exception):
 @bot.event
 async def on_guild_join(guild: discord.Guild):
     server_config = server_configs.get(guild.id)
-
-    welcome_message = "CAS-bot has joined this server"
     first_channel = get_first_channel_with_permission(guild)
-
     if not server_config:
-        welcome_message = "This server is not authorized to work with CAS-bot. Read the instructions to invite the bot in the project README."
-        if first_channel:
-            await first_channel.send(welcome_message)
-        await guild.leave()
+        await leave_guild(guild, first_channel)
         return
 
     if first_channel:
-        await first_channel.send(welcome_message)
+        await first_channel.send("CAS-bot has joined this server")
 
 
 @bot.event
 async def on_ready():
     """This is executed when the bot connects to a server."""
+    if not bot.user:
+        print(f"Failed to connect to discord! bot.user not defined")
+        return
+
     print(f"{bot.user.name} has connected to Discord!")
     try:
         synced = await bot.tree.sync()
@@ -449,6 +455,16 @@ async def on_ready():
     print(f"Connected to database! The collection `users` has {users_count} documents.")
 
     bot.loop.create_task(webserver())
+
+    print(f"The bot is a member in {len(bot.guilds)} guild(s).")
+    for guild in bot.guilds:
+        server_config = server_configs.get(guild.id)
+        if not server_config:
+            print(f"  - LEAVING: {guild.id} [{guild.name}]")
+            await leave_guild(guild, get_first_channel_with_permission(guild))
+            continue
+
+        print(f"  - {guild.id}: {guild.name} [{server_config['configname']}]")
 
 
 if __name__ == "__main__":
