@@ -83,12 +83,20 @@ class DBEntry(TypedDict):
     rollno: str
 
 
+webserver_started = False
+
+
 async def webserver():
     """
     Launch an aiohttp web server.
     This is an internal server used for the JS code in /portal to communicate
     with the code here. This server MUST NOT be exposed to the public.
     """
+    global webserver_started
+    if webserver_started:
+        return
+
+    webserver_started = True
 
     async def authenticate(request: web.Request):
         token = request.match_info["token"]
