@@ -293,7 +293,7 @@ async def verify_user(ctx: commands.Context):
     author = ctx.message.author
     if await is_verified(author.id):
         # user has already previously verified
-        await ctx.interaction.followup.send(f"You are CAS-verified!", ephemeral=True)
+        await ctx.interaction.followup.send("You are CAS-verified!", ephemeral=True)
         await post_verification(ctx, author)
         return
 
