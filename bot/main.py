@@ -279,9 +279,21 @@ async def verify_user(ctx: commands.Context):
         await ctx.reply("This command has been removed, please use /verify instead.")
         return
 
+    if ctx.interaction.is_expired():
+        await ctx.reply(
+            "Your command expired due to some unknown error, please try again."
+        )
+        return
+
+    # defer because sometimes the command can take too long if the database connection
+    # is slow.
+    # it is important that is is ephemeral. It has a secret link that only the
+    # invoker must see.
+    await ctx.defer(ephemeral=True)
     author = ctx.message.author
     if await is_verified(author.id):
         # user has already previously verified
+        await ctx.interaction.followup.send(f"You are CAS-verified!", ephemeral=True)
         await post_verification(ctx, author)
         return
 
@@ -298,9 +310,8 @@ async def verify_user(ctx: commands.Context):
         expire_time = time.time() + VERIFY_TIMEOUT_SECONDS
         token_to_id[token] = (author.id, expire_time)
 
-    # it is important that is is ephemeral. It has a secret link that only the
-    # invoker must see.
-    await ctx.send(
+    # use followup and not ctx reply/send because this message HAS to be ephemeral
+    await ctx.interaction.followup.send(
         f"[This](<{BASE_URL}/cas?token={token}>) is your verification link, click "
         "it to login and verify yourself.\n"
         "IMPORTANT NOTE: Above link is secret, do not share with anyone! "
